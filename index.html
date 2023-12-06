@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Table</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!-- Add jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Add jQuery UI library -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <!-- Add jQuery Validation Plugin -->
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+</head>
+
+<body>
+
+    <h2>Will's Dynamic Multiplication Table</h2>
+    <h3>Enter four numbers, -50 through 50.</h3>
+
+    <!--Create the form and button. Do not allow input <-50 or >50.-->
+    <form id="numberForm">
+        <label for="number1">Column Value 1:</label>
+        <input type="text" id="number1" name="number1" maxlength="3" required>
+        <div id="slider1"></div><br>
+
+        <label for="number2">Column Value 2:</label>
+        <input type="text" id="number2" name="number2" maxlength="3" required>
+        <div id="slider2"></div><br>
+
+        <label for="number3">Row Value 1:</label>
+        <input type="text" id="number3" name="number3" maxlength="3" required>
+        <div id="slider3"></div><br>
+
+        <label for="number4">Row Value 2:</label>
+        <input type="text" id="number4" name="number4" maxlength="3" required>
+        <div id="slider4"></div><br>
+
+        <button type="button" onclick="generateTable()">Generate Table</button>
+    </form>
+
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-1">Parameters</a></li>
+        </ul>
+        <div id="tabs-1">
+            <p>Enter parameters and click "Generate Table" to create a new tab with the multiplication table.</p>
+        </div>
+    </div>
+
+    <!-- Javascript section to create the table (or display error message) -->
+    <script>
+        $(document).ready(function () {
+            // Initialize jQuery UI tabs
+            $("#tabs").tabs();
+    
+            // Initialize jQuery UI sliders
+            initializeSliders();
+    
+            // Add event handler for removing all tabs
+            $("#deleteAllTabs").on("click", function () {
+                $("#tabs ul li:not(:first)").remove();
+                $("#tabs div:not(:first)").remove();
+                $("#tabs").tabs("refresh");
+            });
+    
+            // Add event handler for generating a new table and tab
+            $("#generateTableBtn").on("click", function () {
+                generateTable();
+            });
+    
+            // Handle the close event for tabs
+            $("#tabs").on("click", ".ui-icon-close", function () {
+                var panelId = $(this).closest("li").remove().attr("aria-controls");
+                $("#" + panelId).remove();
+                $("#tabs").tabs("refresh");
+            });
+        });
+    
+        function initializeSliders() {
+            $("#slider1").slider({
+                range: "min",
+                min: -50,
+                max: 50,
+                slide: function (event, ui) {
+                    $("#number1").val(ui.value);
+                }
+            });
+            $("#slider2").slider({
+                range: "min",
+                min: -50,
+                max: 50,
+                slide: function (event, ui) {
+                    $("#number2").val(ui.value);
+                }
+            });
+            $("#slider3").slider({
+                range: "min",
+                min: -50,
+                max: 50,
+                slide: function (event, ui) {
+                    $("#number3").val(ui.value);
+                }
+            });
+            $("#slider4").slider({
+                range: "min",
+                min: -50,
+                max: 50,
+                slide: function (event, ui) {
+                    $("#number4").val(ui.value);
+                }
+            });
+    
+            // Update sliders when input fields change
+            $("#number1").on("change", function () {
+                var value = parseInt($(this).val());
+                $("#slider1").slider("value", value);
+            });
+    
+            $("#number2").on("change", function () {
+                var value = parseInt($(this).val());
+                $("#slider2").slider("value", value);
+            });
+    
+            $("#number3").on("change", function () {
+                var value = parseInt($(this).val());
+                $("#slider3").slider("value", value);
+            });
+    
+            $("#number4").on("change", function () {
+                var value = parseInt($(this).val());
+                $("#slider4").slider("value", value);
+            });
+        }
+    
+        function generateTable() {
+            // Validate the form using jQuery Validation Plugin
+            if ($("#numberForm").valid()) {
+                // Read values from the form
+                var num1 = parseInt($("#number1").val());
+                var num2 = parseInt($("#number2").val());
+                var num3 = parseInt($("#number3").val());
+                var num4 = parseInt($("#number4").val());
+    
+                // Create unique ID for the new tab
+                var tabId = "tabs-" + ($("#tabs ul li").length + 1);
+    
+                // Add a new tab for the generated table
+                $("#tabs ul").append("<li><a href='#" + tabId + "'>" + num1 + ", " + num2 + ", " + num3 + ", " + num4 +
+                    "<span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></a></li>");
+                $("#tabs").append("<div id='" + tabId + "'></div>");
+    
+                // Select the newly added tab
+                $("#tabs").tabs("refresh");
+                $("#tabs").tabs("option", "active", -1);
+    
+                // Create table element
+                var table = document.createElement("table");
+                table.border = "1";
+                table.className = "multiplication-table";
+    
+                // For loop that builds the table by inserting cells
+                var headerRow = table.insertRow();
+                headerRow.insertCell();
+                for (var i = Math.min(num3, num4); i <= Math.max(num3, num4); i++) {
+                    var headerCell = headerRow.insertCell();
+                    headerCell.textContent = i;
+                }
+    
+                // For loops that insert the correct values in their corresponding positions
+                for (var i = Math.min(num1, num2); i <= Math.max(num1, num2); i++) {
+                    var row = table.insertRow();
+                    var headerCell = row.insertCell();
+                    headerCell.textContent = i;
+    
+                    for (var j = Math.min(num3, num4); j <= Math.max(num3, num4); j++) {
+                        var cell = row.insertCell();
+                        cell.textContent = i * j;
+                    }
+                }
+    
+                // Append the table to the newly added tab
+                $("#" + tabId).append(table);
+            }
+        }
+    </script>
+    
+    <!-- Button to close all tabs at once -->
+    <button id="deleteAllTabs">Delete All Tabs</button>
+
+</body>
+
+</html>
